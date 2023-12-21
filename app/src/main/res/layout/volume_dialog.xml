@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:gravity="center" android:orientation="vertical" android:background="@color/back3" android:layout_width="match_parent" android:layout_height="match_parent">
+    <LinearLayout android:gravity="center" android:orientation="vertical" android:background="@color/colorPrimaryClear" android:paddingTop="10dp" android:layout_width="wrap_content" android:layout_height="wrap_content">
+        <LinearLayout android:gravity="center" android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <ImageButton android:textSize="12sp" android:textStyle="bold" android:id="@+id/decrease" android:background="@drawable/back_rect" android:layout_width="30dp" android:layout_height="30dp" android:layout_margin="8dp" android:src="@drawable/baseline_volume_down_24"/>
+            <EditText android:textColor="@color/colorPrimaryDark" android:id="@+id/editInput" android:background="@drawable/back_edit" android:padding="2dp" android:layout_width="40dp" android:layout_height="30dp" android:text="1" android:inputType="numberSigned" android:textAlignment="textEnd" android:layout_marginEnd="2dp"/>
+            <TextView android:textSize="15sp" android:textStyle="bold" android:textColor="@color/colorPrimary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="dB"/>
+            <ImageButton android:textSize="12sp" android:textStyle="bold" android:id="@+id/increase" android:background="@drawable/back_rect" android:layout_width="30dp" android:layout_height="30dp" android:layout_margin="8dp" android:src="@drawable/baseline_volume_up_24"/>
+        </LinearLayout>
+        <LinearLayout android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_margin="10dp">
+            <Button android:textSize="12sp" android:textColor="@color/colorPrimaryDark" android:id="@+id/cancel" android:layout_width="wrap_content" android:layout_height="40dp" android:text="@android:string/cancel" style="?android:attr/buttonBarButtonStyle"/>
+            <Button android:textSize="12sp" android:textColor="@color/colorPrimaryDark" android:id="@+id/ok" android:padding="4dp" android:layout_width="wrap_content" android:layout_height="40dp" android:text="@android:string/ok" style="?android:attr/buttonBarButtonStyle"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

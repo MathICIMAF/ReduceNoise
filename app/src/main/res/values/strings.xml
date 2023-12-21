@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Reduce Noise</string>
+
+    <string name="reduce_video_noise">Reduce Audio\nNoise of Video</string>
+    <string name="reduce_audio_noise">Reduce Noise\nAudio File</string>
+    <string name="video_to_audio">Convert Video\nto Audio</string>
+    <string name="increase_volume">Increase/Decrease\nVideo Volume</string>
+    <string name="open_path">Outputs</string>
+    <string name="folder">Output Folder:</string>
+    <string name="completed">Process finished!!!</string>
+    <string name="empty">Empty folder</string>
+    <string name="app_id" translatable="false">ca-app-pub-6420027936185714~9025124531</string>
+    <string name="banner1" translatable="false">ca-app-pub-6420027936185714/5310074957</string>
+</resources>

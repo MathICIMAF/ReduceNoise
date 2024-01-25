@@ -71,6 +71,7 @@ public class MediaAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> 
                 files.remove(mediaFile);
                 mediaFile.getFile().delete();
                 notifyItemRemoved(position);
+                notifyItemRangeChanged(position, files.size());
             }
         });
         mediaViewHolder.layout.setOnClickListener(new View.OnClickListener() { // from class: com.amg.compressaudio.AudiosAdapter.2

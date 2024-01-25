@@ -7,6 +7,7 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -17,11 +18,14 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -35,13 +39,20 @@ import android.widget.FrameLayout;
 import com.arthenica.mobileffmpeg.Config;
 import com.arthenica.mobileffmpeg.ExecuteCallback;
 import com.arthenica.mobileffmpeg.FFmpeg;
+import com.arthenica.mobileffmpeg.Statistics;
+import com.arthenica.mobileffmpeg.StatisticsCallback;
+import com.google.android.gms.ads.AdError;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.RequestConfiguration;
 import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.android.gms.ads.interstitial.InterstitialAd;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 
 import java.io.File;
 import java.util.Arrays;
@@ -64,6 +75,12 @@ public class MainActivity extends AppCompatActivity {
     int volume = 0;
     private ProgressDialog progressDialog;
 
+    private boolean adIsLoading;
+    private InterstitialAd interstitialAd;
+
+    private int adsCount = 0;
+    SharedPreferences preferences;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,6 +91,10 @@ public class MainActivity extends AppCompatActivity {
         adContainerView = findViewById(R.id.ad_view_container);
 
         // Log the Mobile Ads SDK version.
+
+        SharedPreferences defaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        this.preferences = defaultSharedPreferences;
+        adsCount = preferences.getInt("ADS",0);
 
         googleMobileAdsConsentManager =
                 GoogleMobileAdsConsentManager.getInstance(getApplicationContext());
@@ -111,6 +132,8 @@ public class MainActivity extends AppCompatActivity {
                             if (!initialLayoutComplete.getAndSet(true)
                                     && googleMobileAdsConsentManager.canRequestAds()) {
                                 loadBanner();
+                                if (adsCount % 3 == 0)
+                                    loadInter();
                             }
                         });
 
@@ -159,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Load an ad.
         if (initialLayoutComplete.get()) {
-            loadBanner();
+            //loadBanner();
         }
     }
 
@@ -257,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    void showVolumeDialog(String input, String output){
+    void showVolumeDialog(String input, String output,Uri mediaUri){
         Dialog dialog = new Dialog(MainActivity.this);
         dialog.setContentView(R.layout.volume_dialog);
         EditText editInput = dialog.findViewById(R.id.editInput);
@@ -290,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 int volume = Integer.parseInt(editInput.getText().toString());
                 String command = "-y -i "+ input+" -af \"volume="+volume+"dB\" "+output;
-                executeCommand(command);
+                executeCommand(command,mediaUri);
                 dialog.dismiss();
                 progressDialog.show();
             }
@@ -326,26 +349,26 @@ public class MainActivity extends AppCompatActivity {
                                     fileName = RealPathUtil.getFileName(input);
                                     output = RealPathUtil.newFilePath("DeNoise_vid",fileName,outputFolder);
                                     command = "-y -i "+ input+" -af afftdn=nf=-25:nr=97 " + output;
-                                    executeCommand(command);
+                                    executeCommand(command,selectedVideoUri);
                                     break;
                                 case NoiseAudio:
                                     progressDialog.show();
                                     fileName = RealPathUtil.getFileName(input);
                                     output = RealPathUtil.newFilePath("DeNoise_aud",fileName,outputFolder);
                                     command = "-y -i "+ input+" -af afftdn=nf=-25:nr=97 " + output;
-                                    executeCommand(command);
+                                    executeCommand(command,selectedVideoUri);
                                     break;
                                 case VideoToAudio:
                                     progressDialog.show();
                                     fileName = RealPathUtil.getFileName(input);
                                     output = RealPathUtil.newFilePath("_aud",fileName,outputFolder,"mp3");
                                     command = "-y -i "+ input+" -q:a 0 -map a " + output;
-                                    executeCommand(command);
+                                    executeCommand(command,selectedVideoUri);
                                     break;
                                 case SetVolume:
                                     fileName = RealPathUtil.getFileName(input);
                                     output = RealPathUtil.newFilePath("SetVolume_vid",fileName,outputFolder);
-                                    showVolumeDialog(input,output);
+                                    showVolumeDialog(input,output,selectedVideoUri);
                                     break;
                             }
                         }
@@ -354,7 +377,16 @@ public class MainActivity extends AppCompatActivity {
             }
     );
 
-    private void executeCommand(String command) {
+    private void executeCommand(String command, Uri mediaUri) {
+
+        final int duration = MediaPlayer.create(MainActivity.this, mediaUri).getDuration();
+        Config.enableStatisticsCallback(new StatisticsCallback() {
+            public void apply(Statistics newStatistics) {
+                float parseFloat = (Float.parseFloat(String.valueOf(newStatistics.getTime())) / duration) * 100.0f;
+                float f = parseFloat < 99.0f ? parseFloat : 100.0f;
+                progressDialog.setMessage((int) f+"%");
+            }
+        });
         long executionId = FFmpeg.executeAsync(command, new ExecuteCallback() {
 
             @Override
@@ -393,8 +425,111 @@ public class MainActivity extends AppCompatActivity {
             @Override // android.content.DialogInterface.OnClickListener
             public void onClick(DialogInterface dialogInterface, int i) {
                 dialogInterface.dismiss();
+                if (adsCount % 3 == 0){
+                    showInterstitial();
+                }
             }
         }).show();
     }
 
+    public void loadInter() {
+        // Request a new ad if one isn't already loaded.
+        if (adIsLoading || interstitialAd != null) {
+            return;
+        }
+        adIsLoading = true;
+        AdRequest adRequest = new AdRequest.Builder().build();
+        InterstitialAd.load(
+                this,
+                getString(R.string.inter),
+                adRequest,
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                        // The mInterstitialAd reference will be null until
+                        // an ad is loaded.
+                        MainActivity.this.interstitialAd = interstitialAd;
+                        adIsLoading = false;
+                        Log.i(TAG, "onAdLoaded");
+                        interstitialAd.setFullScreenContentCallback(
+                                new FullScreenContentCallback() {
+                                    @Override
+                                    public void onAdDismissedFullScreenContent() {
+                                        // Called when fullscreen content is dismissed.
+                                        // Make sure to set your reference to null so you don't
+                                        // show it a second time.
+                                        MainActivity.this.interstitialAd = null;
+                                        Log.d("TAG", "The ad was dismissed.");
+                                    }
+
+                                    @Override
+                                    public void onAdFailedToShowFullScreenContent(AdError adError) {
+                                        // Called when fullscreen content failed to show.
+                                        // Make sure to set your reference to null so you don't
+                                        // show it a second time.
+                                        MainActivity.this.interstitialAd = null;
+                                        Log.d("TAG", "The ad failed to show.");
+                                    }
+
+                                    @Override
+                                    public void onAdShowedFullScreenContent() {
+                                        // Called when fullscreen content is shown.
+                                        Log.d("TAG", "The ad was shown.");
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        // Handle the error
+                        Log.i(TAG, loadAdError.getMessage());
+                        interstitialAd = null;
+                        adIsLoading = false;
+
+                        String error =
+                                String.format(
+                                        java.util.Locale.US,
+                                        "domain: %s, code: %d, message: %s",
+                                        loadAdError.getDomain(),
+                                        loadAdError.getCode(),
+                                        loadAdError.getMessage());
+
+                    }
+                });
+    }
+
+    private void showInterstitial() {
+        // Show the ad if it's ready. Otherwise restart the game.
+        if (interstitialAd != null) {
+            interstitialAd.show(this);
+            adsCount++;
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putInt("ADS",adsCount);
+            editor.apply();
+        } /*else {
+
+            if (googleMobileAdsConsentManager.canRequestAds()) {
+                loadInter();
+            }
+        }
+        */
+    }
+
+    @Override
+    public void onDestroy() {
+        deleteTempFile();
+        super.onDestroy();
+    }
+
+    private void deleteTempFile() {
+        final File[] files = getCacheDir().listFiles();
+        if (files != null) {
+            for (final File file : files) {
+                //if (file.getName().contains(TEMP_FILE)) {
+                file.delete();
+                Log.d("DELETE",file.getPath());
+                //}
+            }
+        }
+    }
 }

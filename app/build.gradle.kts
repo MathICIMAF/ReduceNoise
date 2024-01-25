@@ -10,7 +10,7 @@ android {
         applicationId = "com.amg.reducenoise"
         minSdk = 24
         targetSdk = 33
-        versionCode = 3
+        versionCode = 9
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -33,6 +33,7 @@ android {
 
 dependencies {
 
+    implementation("androidx.lifecycle:lifecycle-process:2.6.1")
     implementation ("com.arthenica:mobile-ffmpeg-full:4.4")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")

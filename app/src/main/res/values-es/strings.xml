@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Reducir Ruido</string>
-
+    <string name="progress">Progreso</string>
     <string name="reduce_video_noise">Reduce Ruido\nVideo</string>
     <string name="reduce_audio_noise">Reduce Ruido\nAudio</string>
     <string name="video_to_audio">Convertir Video\na Audio</string>

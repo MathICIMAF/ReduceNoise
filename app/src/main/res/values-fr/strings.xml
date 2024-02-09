@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Reduire le bruit</string>
+    <string name="progress">Progrès</string>
+    <string name="reduce_video_noise">Réduire le bruit audio\nde la vidéo</string>
+    <string name="reduce_audio_noise">Réduire le bruit\nFichier audio</string>
+    <string name="video_to_audio">Convertir la vidéo\nen audio</string>
+    <string name="increase_volume">Augmenter/Diminuer\nvolume vidéo</string>
+    <string name="open_path">Les sorties</string>
+    <string name="folder">Dossier de sortie:</string>
+    <string name="completed">Processus terminé !!!</string>
+    <string name="empty">Dossier vide</string>
+</resources>

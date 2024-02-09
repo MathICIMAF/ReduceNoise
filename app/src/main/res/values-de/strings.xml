@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Lärm reduzieren</string>
+    <string name="progress">Fortschritt</string>
+    <string name="reduce_video_noise">Reduzieren Sie Audio\nVideorauschen</string>
+    <string name="reduce_audio_noise">Rauschen reduzieren\nAudiodatei</string>
+    <string name="video_to_audio">Video in\nAudio konvertieren</string>
+    <string name="increase_volume">Videolautstärke\nerhöhen/verringern</string>
+    <string name="open_path">Ausgänge</string>
+    <string name="folder">Ausgabeordner:</string>
+    <string name="completed">Vorgang abgeschlossen!!!</string>
+    <string name="empty">Leerer Ordner</string>
+</resources>

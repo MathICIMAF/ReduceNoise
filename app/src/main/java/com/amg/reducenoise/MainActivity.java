@@ -134,6 +134,12 @@ public class MainActivity extends AppCompatActivity {
                                 loadBanner();
                                 if (adsCount % 3 == 0)
                                     loadInter();
+                                else{
+                                    adsCount++;
+                                    SharedPreferences.Editor editor = preferences.edit();
+                                    editor.putInt("ADS",adsCount);
+                                    editor.apply();
+                                }
                             }
                         });
 
